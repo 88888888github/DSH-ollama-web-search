@@ -11,6 +11,10 @@ export type PluginsSettingsLocaleKey =
   | 'webSearchTitle' | 'webSearchDescription'
   | 'webSearchApiKey' | 'webSearchApiKeyHint' | 'webSearchApiKeySet' | 'webSearchApiKeyUnset'
   | 'webSearchBaseUrl' | 'webSearchBaseUrlHint' | 'webSearchMaxUses' | 'webSearchMaxUsesHint'
+  | 'ollamaWebSearchTitle' | 'ollamaWebSearchDescription'
+  | 'ollamaWebSearchEnabled' | 'ollamaWebSearchEnabledHint'
+  | 'ollamaWebSearchApiKey' | 'ollamaWebSearchApiKeyHint' | 'ollamaWebSearchApiKeySet' | 'ollamaWebSearchApiKeyUnset'
+  | 'ollamaWebSearchProxy' | 'ollamaWebSearchProxyHint'
 
 /** English copy. */
 export const en: Record<PluginsSettingsLocaleKey, string> = {
@@ -51,6 +55,16 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
   webSearchBaseUrlHint: 'Leave blank to use the provider default.',
   webSearchMaxUses: 'Max searches per request',
   webSearchMaxUsesHint: 'How many times one request may search before it must answer.',
+  ollamaWebSearchTitle: 'Ollama web search',
+  ollamaWebSearchDescription: 'Routes web_search through the Ollama web search API while enabled and keyed.',
+  ollamaWebSearchEnabled: 'Use Ollama for web_search',
+  ollamaWebSearchEnabledHint: 'Takes over from the configured route while checked and a key is configured; unchecking returns to it.',
+  ollamaWebSearchApiKey: 'Ollama API key',
+  ollamaWebSearchApiKeyHint: 'Stored as the OLLAMA_API_KEY credential, outside the settings file. Create a key at ollama.com/settings/keys. Leave blank to keep the current key.',
+  ollamaWebSearchApiKeySet: 'A key is configured.',
+  ollamaWebSearchApiKeyUnset: 'No key is configured; search stays on the configured route until one is.',
+  ollamaWebSearchProxy: 'Proxy URL (optional)',
+  ollamaWebSearchProxyHint: 'Leave empty for a direct connection; fill in a local proxy when this machine cannot reach ollama.com directly.',
 }
 
 /** Simplified Chinese copy. */
@@ -92,4 +106,14 @@ export const zh: Record<PluginsSettingsLocaleKey, string> = {
   webSearchBaseUrlHint: '留空则使用提供方默认地址。',
   webSearchMaxUses: '单次请求最多搜索次数',
   webSearchMaxUsesHint: '一次请求在必须作答前最多可以搜索多少次。',
+  ollamaWebSearchTitle: 'Ollama 网页搜索',
+  ollamaWebSearchDescription: '启用且已配置密钥时，把 web_search 路由到 Ollama 网页搜索 API。',
+  ollamaWebSearchEnabled: '使用 Ollama 进行 web_search',
+  ollamaWebSearchEnabledHint: '勾选且已配置密钥时接管当前配置的搜索路线；取消勾选即恢复原路线。',
+  ollamaWebSearchApiKey: 'Ollama API Key',
+  ollamaWebSearchApiKeyHint: '以 OLLAMA_API_KEY 凭据存储，不写入设置文件。在 ollama.com/settings/keys 创建密钥。留空表示保持当前密钥。',
+  ollamaWebSearchApiKeySet: '已配置密钥。',
+  ollamaWebSearchApiKeyUnset: '未配置密钥；配置之前搜索保持在当前配置的路线上。',
+  ollamaWebSearchProxy: '代理地址（可选）',
+  ollamaWebSearchProxyHint: '留空表示直连；本机无法直连 ollama.com 时填写本地代理。',
 }

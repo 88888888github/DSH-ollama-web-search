@@ -98,6 +98,23 @@
   border-color: var(--dsw-alias-label-error);
 }
 
+.check {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--dsw-alias-brand-primary);
+}
+
+.check:has(input:disabled) {
+  cursor: default;
+}
+
 .invalid {
   margin: 0;
   font-size: 12px;

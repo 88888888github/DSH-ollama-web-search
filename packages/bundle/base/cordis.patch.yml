@@ -411,6 +411,14 @@
       config:
         apiKeyEnv: DEEPSEEK_API_KEY
 
+    # Ollama web search: an alternate provider for the same seam. While its
+    # settings section is enabled and OLLAMA_API_KEY is configured it pins the
+    # selection to itself at runtime; clearing the pin returns to the DeepSeek
+    # route above (auto-selection with one usable provider). The key never
+    # enters configuration — it lives in the credentials document.
+    - id: web-search-ollama
+      name: '@deepseek-ai/dsh-web-search-ollama'
+
     - id: tool-web
       name: '@deepseek-ai/dsh-tool-web'
       config:

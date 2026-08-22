@@ -1,0 +1,8 @@
+# Bundle layer for profiles that install this package. The row is an id-targeted
+# upsert, not an insert: once the seam PR lands upstream, dsh-base already carries
+# the web-search-ollama row and this layer is a harmless no-op (same id in two
+# layers = patch upsert). On a dsh whose base has no such row the patch warns and
+# skips — mounting the row there would fail activation anyway, because that dsh
+# lacks the ctx.web.setSearchProviderId/getSearchProviderId seam this plugin calls.
+- id: web-search-ollama
+  name: '@deepseek-ai/dsh-web-search-ollama'

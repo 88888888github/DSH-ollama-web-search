@@ -84,7 +84,7 @@ export class WebRuntime extends Service {
 
   private searchProviders = new Map<string, WebSearchProvider>()
   private fetchProviders = new Map<string, WebFetchProvider>()
-  private readonly searchProviderId: string | undefined
+  private searchProviderId: string | undefined
   private readonly fetchProviderId: string | undefined
 
   constructor(ctx: Context, config: WebRuntimeConfig = {}) {
@@ -113,6 +113,33 @@ export class WebRuntime extends Service {
    */
   registerFetchProvider(provider: WebFetchProvider): () => void {
     return this.registerProvider(this.fetchProviders, provider)
+  }
+
+  /**
+   * Re-pin or clear the explicit search-provider selection at runtime.
+   *
+   * The `searchProvider` config and `$DSH_WEB_SEARCH_PROVIDER` are boot-time
+   * feeds for this same field; this setter is their runtime twin, for a
+   * provider plugin that owns an operational switch (an alternate search
+   * backend the user enables with a key). Validation does not move: {@link
+   * WebRuntime.search} still resolves per call, so pinning an id that is not
+   * registered or unavailable fails exactly as boot configuration would.
+   * Passing `undefined` clears the pin and returns to auto-selection.
+   * @param id - the provider id to pin, or `undefined` to clear the pin.
+   */
+  setSearchProviderId(id: string | undefined): void {
+    this.searchProviderId = id
+  }
+
+  /**
+   * Read the current explicit search-provider selection, as boot configuration
+   * or {@link WebRuntime.setSearchProviderId} last set it. A plugin that
+   * re-pins on an operational switch captures this at attach so it can restore
+   * the deployment's own choice rather than guessing one.
+   * @returns the pinned provider id, or `undefined` while auto-selection stands.
+   */
+  getSearchProviderId(): string | undefined {
+    return this.searchProviderId
   }
 
   private registerProvider<P extends { readonly id: string }>(store: Map<string, P>, provider: P): () => void {

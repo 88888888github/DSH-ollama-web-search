@@ -156,6 +156,38 @@ describe('WebRuntime execution resolution', () => {
   })
 })
 
+describe('WebRuntime runtime selection re-pin', () => {
+  it('pins a registered provider over auto-selection and clears back to it', async () => {
+    const { web } = await mountWeb()
+    web.registerSearchProvider(makeSearchProvider('exa', available, () => Promise.resolve(searchResult('exa'))))
+    web.registerSearchProvider(makeSearchProvider('perplexity', available, () => Promise.resolve(searchResult('perplexity'))))
+
+    // Two usable providers: without a pin, auto-selection is ambiguous.
+    await expect(web.search({ query: 'q' })).rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_AMBIGUOUS' }))
+
+    web.setSearchProviderId('perplexity')
+    await expect(web.search({ query: 'q' })).resolves.toMatchObject({ content: 'perplexity' })
+
+    web.setSearchProviderId(undefined)
+    await expect(web.search({ query: 'q' })).rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_AMBIGUOUS' }))
+  })
+
+  it('keeps the documented failure modes for a pin that cannot resolve', async () => {
+    const { web } = await mountWeb()
+    web.registerSearchProvider(makeSearchProvider('exa', available, () => Promise.resolve(searchResult('exa'))))
+    web.registerSearchProvider(makeSearchProvider('perplexity', unavailable, () => Promise.resolve(searchResult('perplexity'))))
+
+    web.setSearchProviderId('missing')
+    await expect(web.search({ query: 'q' })).rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_CONFIGURED_MISSING' }))
+
+    web.setSearchProviderId('perplexity')
+    await expect(web.search({ query: 'q' })).rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_CONFIGURED_UNAVAILABLE' }))
+
+    web.setSearchProviderId(undefined)
+    await expect(web.search({ query: 'q' })).resolves.toMatchObject({ content: 'exa' })
+  })
+})
+
 describe('WebRuntime maxResults enforcement', () => {
   it('truncates sources and sets truncated when a provider over-returns', async () => {
     const { web } = await mountWeb()

@@ -146,6 +146,23 @@ export function textField(field: string): CardFieldSpec {
 }
 
 /**
+ * A boolean field. The draft renders as 'true' or 'false'; any other draft is
+ * invalid. A resolved section always carries a boolean (the schema default
+ * stands while no layer names one), so the draft never reads empty and there
+ * is no clear-to-default write here: reverting is the control's reset gesture,
+ * staged through {@link CardForm.resetField}.
+ * @param field - field name inside the namespace section.
+ * @returns the field's conversion spec.
+ */
+export function booleanField(field: string): CardFieldSpec {
+  return {
+    field,
+    format: value => typeof value === 'boolean' ? String(value) : '',
+    parse: text => text === 'true' ? { kind: 'set', value: true } : text === 'false' ? { kind: 'set', value: false } : undefined,
+  }
+}
+
+/**
  * Stages one card's edits over one settings namespace and writes them on save.
  *
  * The form publishes through a snapshot store because slot components read

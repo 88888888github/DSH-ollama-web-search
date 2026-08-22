@@ -88,6 +88,54 @@ export function ValueField(props: FieldProps & {
 }
 
 /**
+ * A staged boolean control: a checkbox rendering the field's draft, with the
+ * same override badge and reset gesture as the value fields. Like every
+ * control here it writes nothing — the card's save is the single point where
+ * the draft becomes a document mutation.
+ * @param props - the field's copy, its staged state, and the toggle actions.
+ * @returns the labelled control.
+ */
+export function CheckField(props: Pick<FieldProps, 'id' | 'label' | 'hint' | 'overridden' | 'overriddenLabel' | 'resetLabel' | 'disabled' | 'onReset'> & {
+  /** Whether the checkbox is checked for the current draft. */
+  checked: boolean
+  /** Stage the toggled value. */
+  onToggle: (checked: boolean) => void
+}) {
+  return (
+    <div className={css.field}>
+      <div className={css.head}>
+        <label className={css.label} htmlFor={props.id}>{props.label}</label>
+        {props.overridden
+          ? (
+            <span className={css.badges}>
+              <span className={css.badge}>{props.overriddenLabel}</span>
+              <button
+                type="button"
+                className={css.reset}
+                disabled={props.disabled}
+                onClick={props.onReset}
+              >
+                {props.resetLabel}
+              </button>
+            </span>
+          )
+          : null}
+      </div>
+      <label className={css.check}>
+        <input
+          id={props.id}
+          type="checkbox"
+          checked={props.checked}
+          disabled={props.disabled}
+          onChange={(event) => { props.onToggle(event.target.checked) }}
+        />
+      </label>
+      <p className={css.hint}>{props.hint}</p>
+    </div>
+  )
+}
+
+/**
  * A write-only credential control. The value never rides a response, so the
  * control reports only whether one is configured and starts blank; a blank
  * draft writes nothing, which keeps the stored key rather than clearing it.
