@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/web/web-search-ollama/README.md
-README.md: cb129d51cb74e89c6dd7ee3613a828eccaa9fad3
-README.zh.md: 4e9413abc9e903312184b47a73fb5f27a127f246
+README.md: 2e636bbae433694a83561aa55125b19da48c2769
+README.zh.md: 784eaac4d1a000e13ffa8b65746f4c6113576ad7

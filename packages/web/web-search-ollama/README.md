@@ -27,6 +27,8 @@ Git-hosted installs (`dsh plugin add github:user/repo`) are not a channel for th
 
 The deployment configures the seam's search provider at boot (the base bundle pins `deepseek-official`). This package owns an operational switch on top of that static configuration: while its section is **enabled** and the `OLLAMA_API_KEY` credential is configured, it re-pins the seam to `ollama` through `ctx.web.setSearchProviderId`; when either falls away (or the plugin unloads), it restores exactly the deployment's own selection, captured at attach. A key written from any surface — the settings card, an external edit of the credentials document — re-pins or restores without a restart, through the `credentials/reference-updated` event.
 
+At boot the credentials service registers at construction and loads its document asynchronously afterwards, so the plugin's attach-time key read can observe an empty snapshot (indistinguishable from "unkeyed", and the initial load emits no event). A bounded convergence loop therefore re-checks every 250 ms for up to 10 s after attach until the first positive answer or the window closes; afterwards the event path above covers writes.
+
 The provider's `available()` reports the same conjunction (enabled AND keyed), so a switched-off or unkeyed Ollama drops out of auto-selection instead of making it ambiguous when no provider is pinned.
 
 ## HTTP: one helper process per search

@@ -119,6 +119,19 @@ class MemoryCredentials extends CredentialProvider {
   }
 }
 
+/** A credentials provider whose document load completes after attach (the production boot race). */
+class DelayedCredentials extends MemoryCredentials {
+  loaded = false
+
+  override describe(ref: CredentialRef): Promise<CredentialInfo> {
+    return this.loaded ? super.describe(ref) : Promise.resolve({ configured: false, writable: true })
+  }
+
+  override resolve(ref: CredentialRef): Promise<ResolvedCredential | undefined> {
+    return this.loaded ? super.resolve(ref) : Promise.resolve(undefined)
+  }
+}
+
 /** Scripted subprocess face: every spawn answers with the fixed verdict and records its spec. */
 class ScriptedSubprocess extends SubprocessRuntime {
   calls: SubprocessSpawnSpec[] = []
@@ -301,5 +314,40 @@ describe('web-search-ollama selection pinning', () => {
     const bench = await boot({ [OLLAMA_API_KEY_REF]: 'oll-test-key' })
     expect(bench.ctx.settings.describe().map(row => String(row.ns))).toContain('web-search-ollama')
     await bench.ctx.fiber.dispose()
+  })
+})
+
+describe('boot convergence (credentials load after attach)', () => {
+  it('pins once the credentials document loads, even when attach read an empty snapshot', async () => {
+    const ctx = new Context()
+    await ctx.plugin(WebRuntime, { searchProvider: 'deepseek-official' })
+    const deepseekFiber = ctx.plugin({ name: 'test-deepseek', inject: ['web'], apply(inner: Context) { inner.web.registerSearchProvider(deepseekProvider()) } })
+    await deepseekFiber.await()
+    const settingsFiber = ctx.plugin(MemorySettings)
+    await settingsFiber.await()
+    // Registered at construction like the real provider; its snapshot stays empty until `loaded`.
+    const credentials = new DelayedCredentials(ctx, { [OLLAMA_API_KEY_REF]: 'oll-late-load' })
+    const subprocess = new ScriptedSubprocess(ctx, ONE_RESULT)
+    const pluginFiber = ctx.plugin(ollamaPlugin, {})
+    await pluginFiber.await()
+
+    // The attach-time read saw the empty snapshot: searches still route to the deployment's choice.
+    expect(await searchSource(ctx)).toBe('https://deepseek.test')
+
+    // The document load completes after attach (the production race).
+    credentials.loaded = true
+
+    // Convergence re-checks on a short interval; poll until the pin lands.
+    const deadline = Date.now() + 5000
+    let source = await searchSource(ctx)
+    while (source !== 'https://ollama.test' && Date.now() < deadline) {
+      await new Promise((resolve) => { setTimeout(resolve, 100) })
+      source = await searchSource(ctx)
+    }
+    expect(source).toBe('https://ollama.test')
+    expect(subprocess.calls.at(-1)).toBeDefined()
+
+    await pluginFiber.dispose()
+    await ctx.fiber.dispose()
   })
 })
